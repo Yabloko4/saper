@@ -4,7 +4,8 @@ import os
 
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtGui import QPixmap
-
+from random import *
+from bs4 import BeautifulSoup
 import design  # Это наш конвертированный файл дизайна
 import time
 from selenium import webdriver
@@ -14,11 +15,7 @@ from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver import ActionChains
 
-#options = Options()
-#options.add_experimental_option("detach", True)
-#options.add_experimental_option('excludeSwitches', ['enable-logging'])
-#driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()),options=options)
-#actionChains = ActionChains(driver)
+
 
 
 #driver.get("https://minesweeper.online/ru/new-game/ng")
@@ -29,242 +26,119 @@ from selenium.webdriver import ActionChains
 #top-area-face zoomable hd_top-area-face-lose
       
 class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
-    def __init__(self):
-        # Это здесь нужно для доступа к переменным, методам
-        # и т.д. в файле design.py
-        super().__init__()
-        self.setupUi(self)  # Это нужно для инициализации нашего дизайна
-        self.Button_easy.clicked.connect(self.easy_mod)  # Выполнить функцию browse_folder при нажатии кнопки
-        self.Button_medium.clicked.connect(self.medium_mod)
-        self.Button_hard.clicked.connect(self.hard_mod)
-        #self.change_bt.clicked.connect(self.change_bt_func)
-        #self.delete_bt.clicked.connect(self.delete_bt_func)
+       def __init__(self):
+              # Это здесь нужно для доступа к переменным, методам
+              # и т.д. в файле design.py
+              super().__init__()
+              self.setupUi(self)  # Это нужно для инициализации нашего дизайна
+              self.Button_easy.clicked.connect(self.easy_mod)  # Выполнить функцию browse_folder при нажатии кнопки
+              self.Button_medium.clicked.connect(self.medium_mod)
+              self.Button_hard.clicked.connect(self.hard_mod)
 
-    def easy_mod(self):
-        d_user = {}
-        isgo = 0
-        self.status_label.setText("Статус: " + "Парсинг в процессе")
+       def play(zopa, level):
+              try:
+                     options = Options()
+                     options.add_experimental_option("detach", True)
+                     options.add_experimental_option('excludeSwitches', ['enable-logging'])
+                     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()),options=options)
+                     actionChains = ActionChains(driver)
+                     url = f"https://minesweeper.online/ru/start/{level}" 
+                     driver.implicitly_wait(30)                  # Ожидаем загрузки страницы если не дождались то timeout
+                     driver.get(url = url)
+                     time.sleep(3)
 
-        for i in range(0, 1):
-            page = requests.get(f"https://kinocentr86.ru/events?facility=yugorskii-kinoprokat")
-            page1 = page.content
-            soup = BeautifulSoup(page1, "lxml")
-            options = Options()
-            options.add_argument("--headless")
-            driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-            count_name = 2
-            count_description = 0
-            u = 0
-            driver.get('https://kinocentr86.ru/events?facility=yugorskii-kinoprokat')
-            inf = soup.find_all("h2", class_="sc-1h5tg87-0 idrJef title")
-            st = str(inf).split('href')
-            l = 0
-            for i in range(0, len(st)):
-                #print(l)
-                l +=1
-        # записываем название фильмов
-            for z in range(0, l-1):
-                inf = soup.find_all("h2", class_="sc-1h5tg87-0 idrJef title")
-                st = str(inf).split('>')
-                d_user[isgo] = {}
-                name = st[z+count_name][0:len(st[z+count_name])-3]
-                d_user[isgo]['name'] = str(name)
-        # записываем даты начала проката
-                inf = soup.find_all("div", class_="sc-jp24ki-1 qqVem")
-                st = str(inf).split('В прокате с')
-                data_start = st[z+1][38:45]
-                d_user[isgo]['data_start'] = str(data_start)
-        # записываем даты конца проката
-                inf = soup.find_all("div", class_="sc-jp24ki-1 qqVem")
-                st = str(inf).split('В прокате до')
-                data_finish = st[z+1][38:45]
-                d_user[isgo]['data_finish'] = str(data_finish)
-        # записываем хоронометраж, если есть
-                inf = soup.find_all("div", class_="sc-jp24ki-1 qqVem")
-                st = str(inf).split('Дата может быть изменена кинотеатром или прокатчиком')
-                if st[z+1].find("Хронометраж") !=-1:
-                    duration = st[z+1][1135:1145]
-                else:
-                    duration = "-"
-                d_user[isgo]['duration'] = str(duration)
-        # записываем режисера
-                inf = soup.find_all("div", class_="sc-jp24ki-1 qqVem")
-                st = str(inf).split('Дата может быть изменена кинотеатром или прокатчиком')
-                if st[z+1].find("Режиссер") !=-1:
-                    first_line = st[z+1].split('Режиссер')
-                    second_line = first_line[1].split('</div>')
-                    director = second_line[1][32:len(second_line[1])]
-                else:
-                    director = '-'
-                d_user[isgo]['director'] = str(director)
-        # записываем актеров
-                inf = soup.find_all("div", class_="sc-jp24ki-1 qqVem")
-                st = str(inf).split('Дата может быть изменена кинотеатром или прокатчиком')
-                if st[z+1].find("В ролях") !=-1:
-                    first_line = st[z+1].split('В ролях')
-                    second_line = first_line[1].split('</div>')
-                    roles = second_line[1][32:len(second_line[1])]
-                else:
-                    roles = '-'
-                d_user[isgo]['roles'] = str(roles)
-        # записываем описание
-                inf = soup.find_all("div", class_="sc-bdvvtL sc-gsDKAQ sc-gp24bs-7 iiPQI hIxhWw bxXAEF")
-                st = str(inf).split('sc-bdvvtL sc-gsDKAQ sc-gp24bs-7 iiPQI hIxhWw bxXAEF')
-                if st[z+1].find("sc-gp24bs-8 fOqJFv") !=-1:
-                    st = st[z+1].split('sc-gp24bs-8 fOqJFv')
-                    first_line = st[1].split('><div>')
-                    second_line = first_line[1].split('</div>')
-                    description = second_line[0]
-                else:
-                    description = '-'
-                d_user[isgo]['description'] = str(description.replace("\n", " "))
-        # скачиваем постер
-                #driver.execute_script("window.scrollTo(0, " + str(z*1000) + ");")
-                u += 1000
-                time.sleep(2)
-                driver.execute_script("arguments[0].scrollIntoView();", (driver.find_elements(by=By.TAG_NAME, value="img")[z+2]))
-                images = driver.find_elements(by=By.TAG_NAME, value="img")
-                #print(images[z+1].get_attribute('src'))
-                src = images[z+1].get_attribute('src')
-                try:    
-                    p = requests.get(src)
-                    name_of_poster = (d_user[z]['name']).replace(":", "")
-                    path_of_poster = "C:\practic\ "
-                    file = path_of_poster[0:11] + name_of_poster +".jpg"
-                    #print(file)
-                    out = open(file = file, mode= 'wb')
-                    out.write(p.content)
-                    out.close()
-                except :
-                    a= 0
-                
-                count_name +=3
-                count_description =2
-                isgo += 1
-        #print(d_user)
-        path_of_poster = "C:\practic\ "
-        name_of_file = "parse_result"
-        file = path_of_poster[0:11] + name_of_file +".txt"
-        with open(file = file, mode = "w", encoding = 'utf-8') as f:
-            for i in range(0, l-1):
-                f.write(d_user[i]['name'] + "$" + d_user[i]['data_start'] + "$" + d_user[i]['data_finish'] + "$" + d_user[i]['duration'] + "$" + d_user[i]['director'] + "$" + d_user[i]['roles']+ "$" + d_user[i]['description'] + "\n")
-        self.status_label.setText("Статус: " + "Парсинг Завершён")
-        if self.checkBox.isChecked():
-            try:
-                self.status_label.setText("Статус: " + "Загрузка в процессе")
-                self.comboBox_of_film.clear()
-                path_of_poster = "C:\practic\ "
-                name_of_file = "parse_result"
-                file = path_of_poster[0:11] + name_of_file +".txt"
-                with open(file = file, mode = "r", encoding = 'utf-8') as f:
-                    for line in f:
-                        lines = line.split("$")
-                        self.comboBox_of_film.addItem(lines[0])
-                text = self.comboBox_of_film.currentText()
-                path_of_poster = "C:\practic\ "
-                name_of_file = "parse_result"
-                name_of_poster = text.replace(":", "")
-                file = path_of_poster[0:11] + name_of_file +".txt"
-                with open(file = file, mode = "r", encoding = 'utf-8') as f:
-                    for line in f:
-                        if line.find(text) !=-1:
-                            lines = line.split("$")
-                            self.film.setText("Название: " + lines[0])
-                            self.data_start.setText("Начало проката: " + lines[1])
-                            self.data_end.setText("Конец проката: " + lines[2])
-                            self.duration.setText("Хронометраж: " + lines[3])
-                            self.director.setText("Режиссер: " + lines[4])
-                            self.actors.setText("В ролях: " + lines[5])
-                            self.discription.setText(lines[6])
-                            self.discription.setFont(QtGui.QFont('SansSerif', 10)) # Изменение шрифта и размера
-                            pixmap = QPixmap(path_of_poster[0:11] + name_of_poster +".jpg")
-                            self.poster.setPixmap(pixmap)
-                self.status_label.setText("Статус: " + "Парсинг и Загрузка завершена")
-            except:
-                self.film.setText("ОШИБКА")
-    def medium_mod(self):
-        try:
-            self.status_label.setText("Статус: " + "Загрузка в процессе")
-            self.comboBox_of_film.clear()
-            path_of_poster = "C:\practic\ "
-            name_of_file = "parse_result"
-            file = path_of_poster[0:11] + name_of_file +".txt"
-            with open(file = file, mode = "r", encoding = 'utf-8') as f:
-                for line in f:
-                    lines = line.split("$")
-                    self.comboBox_of_film.addItem(lines[0])
-            text = self.comboBox_of_film.currentText()
-            path_of_poster = "C:\practic\ "
-            name_of_file = "parse_result"
-            name_of_poster = text.replace(":", "")
-            file = path_of_poster[0:11] + name_of_file +".txt"
-            with open(file = file, mode = "r", encoding = 'utf-8') as f:
-                for line in f:
-                    if line.find(text) !=-1:
-                        lines = line.split("$")
-                        self.film.setText("Название: " + lines[0])
-                        self.data_start.setText("Начало проката: " + lines[1])
-                        self.data_end.setText("Конец проката: " + lines[2])
-                        self.duration.setText("Хронометраж: " + lines[3])
-                        self.director.setText("Режиссер: " + lines[4])
-                        self.actors.setText("В ролях: " + lines[5])
-                        self.discription.setText(lines[6])
-                        self.discription.setFont(QtGui.QFont('SansSerif', 10)) # Изменение шрифта и размера
-                        pixmap = QPixmap(path_of_poster[0:11] + name_of_poster +".jpg")
-                        self.poster.setPixmap(pixmap)
-            self.status_label.setText("Статус: " + "Загрузка завершена")
-        except:
-            self.film.setText("ОШИБКА")
-    def hard_mod(self):
-        try:
-            self.status_label.setText("Статус: " + "Удаление в процессе")
-            text_new_desc = self.new_discription.text()
-            text = self.comboBox_of_film.currentText()
-            path_of_poster = "C:\practic\ "
-            name_of_file = "parse_result"
-            name_of_poster = text.replace(":", "")
-            file = path_of_poster[0:11] + name_of_file +".txt"
-            
-            with open (file = file, mode = 'r',encoding = 'utf-8') as f:
-                old_data = f.read()
-            with open(file = file, mode = "r+", encoding = 'utf-8') as f:
-                for line in f:
-                    if line.find(text) !=-1:
-                        line_to_change = line
-            new_data = old_data.replace(line_to_change, "")
+              
+                     h,w = 0,0                                #Создание  переменных высоты и ширины поля в зависимости от выбранной сложности
+                     if level == 1 or level % 10 == 1 :
+                            h = 9
+                            w = 9
+                     elif level == 2 or level % 10 == 2 :
+                            h = 16
+                            w = 16
+                     elif level == 3 or level % 10 == 3 :
+                            h = 16
+                            w = 30
 
-            with open (file = file, mode ='w',encoding = 'utf-8') as f:
-                f.write(new_data)
-            self.comboBox_of_film.clear()
-            path_of_poster = "C:\practic\ "
-            name_of_file = "parse_result"
-            file = path_of_poster[0:11] + name_of_file +".txt"
-            with open(file = file, mode = "r", encoding = 'utf-8') as f:
-                for line in f:
-                    lines = line.split("$")
-                    self.comboBox_of_film.addItem(lines[0])
-            text = self.comboBox_of_film.currentText()
-            path_of_poster = "C:\practic\ "
-            name_of_file = "parse_result"
-            name_of_poster = text.replace(":", "")
-            file = path_of_poster[0:11] + name_of_file +".txt"
-            with open(file = file, mode = "r", encoding = 'utf-8') as f:
-                for line in f:
-                    if line.find(text) !=-1:
-                        lines = line.split("$")
-                        self.film.setText("Название: " + lines[0])
-                        self.data_start.setText("Начало проката: " + lines[1])
-                        self.data_end.setText("Конец проката: " + lines[2])
-                        self.duration.setText("Хронометраж: " + lines[3])
-                        self.director.setText("Режиссер: " + lines[4])
-                        self.actors.setText("В ролях: " + lines[5])
-                        self.discription.setText(lines[6])
-                        self.discription.setFont(QtGui.QFont('SansSerif', 10)) # Изменение шрифта и размера
-                        pixmap = QPixmap(path_of_poster[0:11] + name_of_poster +".jpg")
-                        self.poster.setPixmap(pixmap)
-            self.status_label.setText("Статус: " + "Удаление завершено")
-        except:
-            self.film.setText("ОШИБКА")
+                     win, lose = 0, 0
+                     #field,xMarkIndexY,xMarkIndexX = gameFieldPars(h, w, driver) # Вызываем функцию из сайтворкера для парсинга игрового поля, это кортеж потому что мы ещё передаём координаты крестика для режима игры без угадывания, если крестика нет возвращается field, None,None
+                     html = driver.page_source                                                       # Из селениума получаем отрендереную html страницу что бы парсить её супом а не искать через find_element в selenium
+                     soup = BeautifulSoup(html,"lxml")                                               # Передавая в конструктор супа, наш html мы получаем дерево элементов с помощью парсера lxml
+                     elements = soup.find_all("div","cell")                                          # с помощью find_all находим все элементы div с CSS классом cell
+
+                     ind = 0                                                                         # индекс для перебора элементов в elements
+                     xMarkIndexY = None
+                     xMarkIndexX = None
+                     field = [[0] * w for i in range(h)] # Создание поля шириной w и высотой h
+                     for j in range (h): 
+                            for i in range (w):
+                                   elementClassLine = elements[ind]["class"] #bs4.element.ResultSet содержит внутри элементы типа Tag у которого с помощью ["class"] можно получить строку CSS классов
+                                   ind += 1
+                                   #field[j][i] = self.cellPars(elementClassLine)
+                                   elementClassLine:list[str]
+                                   if elementClassLine[2] == "hd_closed" and len(elementClassLine) == 3 : # Если ячейка закрыта
+                                          field[j][i] = "-9"
+                                   elif elementClassLine[2] == "hd_closed" and elementClassLine[3] == "hd_flag": # Если ячейка закрыта, и на ней флаг
+                                          field[j][i] = "f"     #пока поставил '*' что бы не ломалась программа при победе
+                                   elif elementClassLine[2] == "hd_closed" and elementClassLine[3] == "start": #Если ячейка закрыта и на ней крестик, это для режима без угадывания
+                                          field[j][i] = "x"
+                                   elif elementClassLine[2] == "hd_opened" and elementClassLine[3] == "hd_type0": # Получение количества мин рядом с ячейкой
+                                          field[j][i] = "0"
+                                   elif elementClassLine[2] == "hd_opened" and elementClassLine[3] == "hd_type1": # Получение количества мин рядом с ячейкой
+                                          field[j][i] = "1"
+                                   elif elementClassLine[2] == "hd_opened" and elementClassLine[3] == "hd_type2": # Получение количества мин рядом с ячейкой
+                                          field[j][i] = "2"
+                                   elif elementClassLine[2] == "hd_opened" and elementClassLine[3] == "hd_type3": # Получение количества мин рядом с ячейкой
+                                          field[j][i] = "3"
+                                   elif elementClassLine[2] == "hd_opened" and elementClassLine[3] == "hd_type4": # Получение количества мин рядом с ячейкой
+                                          field[j][i] = "4"
+                                   elif elementClassLine[2] == "hd_opened" and elementClassLine[3] == "hd_type5": # Получение количества мин рядом с ячейкой
+                                          field[j][i] = "5"
+                                   elif elementClassLine[2] == "hd_opened" and elementClassLine[3] == "hd_type6": # Получение количества мин рядом с ячейкой
+                                          field[j][i] = "6"
+                                   elif elementClassLine[2] == "hd_opened" and elementClassLine[3] == "hd_type7": # Получение количества мин рядом с ячейкой
+                                          field[j][i] = "7"
+                                   elif elementClassLine[2] == "hd_opened" and elementClassLine[3] == "hd_type8": # Получение количества мин рядом с ячейкой
+                                          field[j][i] = "8"
+
+                                   if field[j][i] == "x":
+                                          xMarkIndexY = j
+                                          xMarkIndexX = i
+                     if xMarkIndexY != None and xMarkIndexY != None: 
+                            element = driver.find_element(By.XPATH, f"//*[@id=\"cell_{xMarkIndexX}_{xMarkIndexY}\"]")
+                            element.click()
+
+              except Exception as ex :
+                     print(ex)
+
+       def easy_mod(self):
+              try:
+                     if self.Guess_mo.isChecked():
+                            level = 11
+                     else:
+                            level = 1
+                     self.play(level)
+              except Exception as ex :
+                     print(ex)
+
+       def medium_mod(self):
+              try:
+                     if self.Guess_mo.isChecked():
+                            level = 12
+                     else:
+                            level = 2
+                     self.play(level)
+              except Exception as ex :
+                     print(ex)
+       def hard_mod(self):
+              try:
+                     if self.Guess_mo.isChecked():
+                            level = 13
+                     else:
+                            level = 3
+                     self.play(level)
+              except Exception as ex :
+                     print(ex)
+       
 
 
 
