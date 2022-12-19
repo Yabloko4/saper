@@ -88,11 +88,62 @@ for lol in range(1):
                     if row != (i-1):
                         start_is_clicked = True
                         break
+    def begin():
+        start_is_clicked = False
+        for hz in range(0,2):
+            for row in range(0,i):
+                if (start_is_clicked == True):
+                    start_is_clicked = False
+                    break
+                #print("новая строка")
+                for column in range(0,j):
+                    str = (f'//*[@id="cell_{column}_{row}"]')
+                    cell = driver.find_element(By.XPATH, str)
+                    if hz == 1:
+                        mas[row][column] = f'{cell.get_attribute("class")}'
+                        #id += 1
+                    #mas[j][row] = cell.get_attribute
+                    #print(cell.get_attribute("class"))
+                    #print(f'column = {column}, row = {row}')
+                    if (cell.get_attribute("class") == "cell size24 hd_closed start"):
+                        mas[row][column] = {cell.get_attribute("class")}
+                        cell.click()
+                        if row != (i-1):
+                            start_is_clicked = True
+                            break
     fake_mas = [0] * i 
     for l in range(i): 
         fake_mas[l] = [0] * j
+    
 
-    #print(len(mas[0][0]))
+    def look_in_field():
+        global id
+        for row in range(0,i):
+            #print("новая строка")
+            for column in range(0,j):
+                str = (f'//*[@id="cell_{column}_{row}"]')
+                cell = driver.find_element(By.XPATH, str)
+                if hz == 1:
+                        mas[row][column] = f'{id} {cell.get_attribute("class")}'
+                        id += 1
+
+    def check_game():
+        global wincount
+        global losecount
+        if driver.find_element(By.XPATH, '//*[@id="top_area_face"]').get_attribute('class')=='top-area-face zoomable hd_top-area-face-unpressed':
+            print('Играем')
+        elif driver.find_element(By.XPATH, '//*[@id="top_area_face"]').get_attribute('class')=='top-area-face zoomable hd_top-area-face-lose':
+                time.sleep(2)
+                #driver.find_element(By.XPATH, '//*[@id="top_area_face"]').click()
+                
+                losecount +=1
+                #begin()
+        elif driver.find_element(By.XPATH, '//*[@id="top_area_face"]').get_attribute('class')=='top-area-face zoomable hd_top-area-face-win':
+                time.sleep(2)
+                #driver.find_element(By.XPATH, '//*[@id="top_area_face"]').click()
+                wincount +=1
+                #begin()
+        
     def update_fake_mas():
         global id
         for row in range(i):
@@ -114,98 +165,86 @@ for lol in range(1):
                 if mas[row][column].find('cell size24 hd_closed hd_flag') != -1:
                     fake_mas[row][column]= 'f'
                 id += 1
-    update_fake_mas()
-    for row in fake_mas:
-        print(*row)
+    
     def clicks_on_cells(list_of_left_clicks):
             for item in list_of_left_clicks:
                     cell = driver.find_element(By.XPATH, item)
                     if cell.get_attribute("class") != 'cell size24 hd_closed hd_flag':
                         cell.click()
+                        #time.sleep(2)
     def set_flags(list_of_right_clicks):
             for item in list_of_right_clicks:
                     cell = driver.find_element(By.XPATH, item)
                     if cell.get_attribute("class") != 'cell size24 hd_closed hd_flag':
                         actionChains.context_click(cell).perform()
+                        #time.sleep(2)
     
-    def search_for_flags(fake_mas:list):
-        #yx = []
+    def search_for_turns(fake_mas:list):
         count_turns = 0
-        while(True):
-            list_of_right_clicks = []
-            list_of_left_clicks = []
-            count = 0
-            count_flags = 0
-            offsetList = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]]
-            xIndex,yIndex = 0,0
+        list_of_right_clicks = []
+        list_of_left_clicks = []
+        count_offset = 0
+        count_opened_sosed = 0
+        count = 0
+        count_flags = 0
+        offsetList = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]]
+        xIndex,yIndex = 0,0
+        for row in fake_mas:
+            for column in row:
+                for offset in offsetList:
+                    if yIndex + offset[0] >= 0 and xIndex + offset[1] >=0 and yIndex + offset[0] <= len(fake_mas) - 1 and xIndex + offset[1] <= len(row) - 1 : # первый and проверка на отрицательность смещённых индексов, что бы не получать значения с конца. Третий and для определения вышли мы за предел листа и если вышли то пропускаем такое смещение
+                        count_offset += 1
+                        if fake_mas[yIndex + offset[0]][xIndex + offset[1]].find('-9') == -1 and column.find('-9') == -1 and column.find('f') == -1:
+                            count_opened_sosed += 1
+                        if fake_mas[yIndex + offset[0]][xIndex + offset[1]].find('-9') != -1 or fake_mas[yIndex + offset[0]][xIndex + offset[1]].find('f') != -1 and column.find('-9') == -1 and column.find('f') == -1:
+                            count +=1
+                            coordinates_of_flags = (f'//*[@id="cell_{xIndex + offset[1]}_{yIndex + offset[0]}"]')
+                            list_of_right_clicks.append(coordinates_of_flags)
+                        if column.find('-9') == -1 and column.find('f') == -1:
+                            coordinates_of_click = (f'//*[@id="cell_{xIndex + offset[1]}_{yIndex + offset[0]}"]')
+                            list_of_left_clicks.append(coordinates_of_click)
+                            if fake_mas[yIndex + offset[0]][xIndex + offset[1]].find('f') != -1:
+                                count_flags +=1
+                
+                if column.find('f') == -1 and count <= int(column) and count != 0 and count_offset != count_opened_sosed:
+                    set_flags(list_of_right_clicks)
+                    check_game()
+                    count_turns += 1
+                if column.find('f') == -1 and count_flags == int(column) and count_flags != 0 and count_offset != count_opened_sosed:
+                    clicks_on_cells(list_of_left_clicks)
+                    check_game()
+                    count_turns += 1
+                count_offset = 0 
+                list_of_left_clicks = []
+                list_of_right_clicks = []
+                count_flags = 0
+                count = 0
+                xIndex += 1                     #rowIndex - счётчик символа в строке
+            xIndex = 0                            #Обнуляем счётчик что бы не словить out of range
+            yIndex += 1                         #columnindex - счётчик строки
+    
+        if len(fake_mas) ==0:
             for row in fake_mas:
                 for column in row:
                     for offset in offsetList:
                         if yIndex + offset[0] >= 0 and xIndex + offset[1] >=0 and yIndex + offset[0] <= len(fake_mas) - 1 and xIndex + offset[1] <= len(row) - 1 : # первый and проверка на отрицательность смещённых индексов, что бы не получать значения с конца. Третий and для определения вышли мы за предел листа и если вышли то пропускаем такое смещение
-                            if fake_mas[yIndex + offset[0]][xIndex + offset[1]].find('-9') != -1 and column.find('-9') == -1 and column.find('f') == -1:
-                                count +=1
-                                coordinates_of_flags = (f'//*[@id="cell_{xIndex + offset[1]}_{yIndex + offset[0]}"]')
-                                print(f'жопа y{yIndex + offset[0]} x{xIndex + offset[1]}')
-                                print(coordinates_of_flags)
-                                print(column)
-                                list_of_right_clicks.append(coordinates_of_flags)
-                            if fake_mas[yIndex + offset[0]][xIndex + offset[1]].find('f') != -1 and column.find('-9') == -1 and column.find('f') == -1:
-                                count_flags +=1
-                                coordinates_of_click = (f'//*[@id="cell_{xIndex + offset[1]}_{yIndex + offset[0]}"]')
-                                print(f'жопа y{yIndex + offset[0]} x{xIndex + offset[1]}')
-                                print(coordinates_of_click)
-                                print(column)
-                                list_of_left_clicks.append(coordinates_of_click)
-                                #yx.append([yIndex + offset[0],xIndex + offset[1]])
-
-                    if column.find('f') == -1 and count <= int(column):
-                        print("вокруг клетки меньши либо равно закрытых клеток \nрайт клики")
-                        print(list_of_right_clicks)
-                        set_flags(list_of_right_clicks)
-                        count_turns += 1
-                        #for para in yx:
-                            #fake_mas[para[0]][para[1]] = "f"
-                    if column.find('f') == -1 and count_flags == int(column):
-                        print("количество флагов вокруг клетки равно клетке \nлефт клики")
-                        print(list_of_left_clicks)
-                        clicks_on_cells(list_of_left_clicks)
-                        count_turns += 1
-                    list_of_left_clicks = []
-                    list_of_right_clicks = []
-                    count_flags = 0
-                    count = 0
-                    xIndex += 1                     #rowIndex - счётчик символа в строке
-                xIndex = 0                            #Обнуляем счётчик что бы не словить out of range
-                yIndex += 1                         #columnindex - счётчик строки
+                            if fake_mas[yIndex + offset[0]][xIndex + offset[1]].find('-9') != -1 and column.find('-9') == -1 and column.find('f') == -1 and column.find('1') != -1:
+                                coordinate_of_click = (f'//*[@id="cell_{xIndex + offset[1]}_{yIndex + offset[0]}"]')
+                                pure = driver.find_element(By.XPATH, coordinate_of_click)    
+                                pure.click() 
+                                check_game() 
         
-            if count_turns == 0:
-                for row in fake_mas:
-                    for column in row:
-                        for offset in offsetList:
-                            if yIndex + offset[0] >= 0 and xIndex + offset[1] >=0 and yIndex + offset[0] <= len(fake_mas) - 1 and xIndex + offset[1] <= len(row) - 1 : # первый and проверка на отрицательность смещённых индексов, что бы не получать значения с конца. Третий and для определения вышли мы за предел листа и если вышли то пропускаем такое смещение
-                                if fake_mas[yIndex + offset[0]][xIndex + offset[1]].find('-9') != -1 and column.find('-9') == -1 and column.find('f') == -1 and column.find('1') != -1:
-                                    coordinate_of_click = (f'//*[@id="cell_{xIndex + offset[1]}_{yIndex + offset[0]}"]')
-                                    driver.find_element(By.XPATH, coordinate_of_click)      
-            count_turns = 0  
-                      #container.append([cell, xIndex, yIndex, field[yIndex + offset[0]][xIndex + offset[1]], xIndex + offset[1], yIndex + offset[0]]) # Состав одного элемента listOfneighborCells: [Ячейка, Координата X, Координата Y, Содержимое соседней ячейки, Координата Х соседа, Координата У соседа]
-#Состав одного элта listOfneighborCells: [Ячейка, Координата X, Координата Y, Содержимое соседней ячейки, Координата Х соседа, Координата У соседа]
-                    
-    search_for_flags(fake_mas)
+        count_turns = 0
+        check_game() 
+                   
+    update_fake_mas()
+    for row in fake_mas:
+        print(*row)        
+    for lal in range(30):
+        look_in_field()
+        update_fake_mas()
+        search_for_turns(fake_mas)
 
-    if driver.find_element(By.XPATH, '//*[@id="top_area_face"]').get_attribute('class')=='top-area-face zoomable hd_top-area-face-unpressed':
-        s
-    elif driver.find_element(By.XPATH, '//*[@id="top_area_face"]').get_attribute('class')=='top-area-face zoomable hd_top-area-face-lose':
-            time.sleep(2)
-            driver.find_element(By.XPATH, '//*[@id="top_area_face"]').click()
-            losecount +=1
-            break
-    elif driver.find_element(By.XPATH, '//*[@id="top_area_face"]').get_attribute('class')=='top-area-face zoomable hd_top-area-face-win':
-            time.sleep(2)
-            driver.find_element(By.XPATH, '//*[@id="top_area_face"]').click()
-            wincount +=1
-            break
-    driver.find_element(By.XPATH, '//*[@id="top_area_face"]').click()
-    isnt_finished += 1
 print(f'Количество побед: {wincount}')
 print(f'Количество поражений: {losecount}')
 print(f'Всего сыграно: {isnt_finished}')
