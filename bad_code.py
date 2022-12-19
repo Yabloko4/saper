@@ -5,7 +5,7 @@ import os
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtGui import QPixmap
 
-import design  # Это наш конвертированный файл дизайна
+#import design  # Это наш конвертированный файл дизайна
 import time
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -137,12 +137,14 @@ for lol in range(1):
                 #driver.find_element(By.XPATH, '//*[@id="top_area_face"]').click()
                 
                 losecount +=1
+                print('Проигрыш')
                 #begin()
         elif driver.find_element(By.XPATH, '//*[@id="top_area_face"]').get_attribute('class')=='top-area-face zoomable hd_top-area-face-win':
                 time.sleep(2)
                 #driver.find_element(By.XPATH, '//*[@id="top_area_face"]').click()
                 wincount +=1
                 #begin()
+                print('Победа')
         
     def update_fake_mas():
         global id
@@ -215,6 +217,7 @@ for lol in range(1):
                     check_game()
                     count_turns += 1
                 count_offset = 0 
+                count_opened_sosed = 0
                 list_of_left_clicks = []
                 list_of_right_clicks = []
                 count_flags = 0
