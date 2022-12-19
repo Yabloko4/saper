@@ -1,7 +1,7 @@
 import sys  # sys нужен для передачи argv в QApplication
 import os
 #from tkinter.tix import TEXT  # Отсюда нам понадобятся методы для отображения содержимого директорий
-
+from work_with_field import *
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtGui import QPixmap
 from random import *
@@ -15,15 +15,6 @@ from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver import ActionChains
 
-
-
-
-#driver.get("https://minesweeper.online/ru/new-game/ng")
-#https://minesweeper.online/ru/start/1
-#https://minesweeper.online/ru/new-game/ng
-#top-area-face zoomable hd_top-area-face-unpressed
-#top-area-face zoomable hd_top-area-face-win
-#top-area-face zoomable hd_top-area-face-lose
       
 class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
        def __init__(self):
@@ -34,6 +25,7 @@ class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
               self.Button_easy.clicked.connect(self.easy_mod)  # Выполнить функцию browse_folder при нажатии кнопки
               self.Button_medium.clicked.connect(self.medium_mod)
               self.Button_hard.clicked.connect(self.hard_mod)
+              
 
        def play(zopa, level):
               try:
@@ -60,52 +52,56 @@ class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
                             w = 30
 
                      win, lose = 0, 0
-                     #field,xMarkIndexY,xMarkIndexX = gameFieldPars(h, w, driver) # Вызываем функцию из сайтворкера для парсинга игрового поля, это кортеж потому что мы ещё передаём координаты крестика для режима игры без угадывания, если крестика нет возвращается field, None,None
-                     html = driver.page_source                                                       # Из селениума получаем отрендереную html страницу что бы парсить её супом а не искать через find_element в selenium
-                     soup = BeautifulSoup(html,"lxml")                                               # Передавая в конструктор супа, наш html мы получаем дерево элементов с помощью парсера lxml
-                     elements = soup.find_all("div","cell")                                          # с помощью find_all находим все элементы div с CSS классом cell
+                     while(True):
+                            html = driver.page_source                                                       # Из селениума получаем отрендереную html страницу что бы парсить её супом а не искать через find_element в selenium
+                            soup = BeautifulSoup(html,"lxml")                                               # Передавая в конструктор супа, наш html мы получаем дерево элементов с помощью парсера lxml
+                            elements = soup.find_all("div","cell")                                          # с помощью find_all находим все элементы div с CSS классом cell
 
-                     ind = 0                                                                         # индекс для перебора элементов в elements
-                     xMarkIndexY = None
-                     xMarkIndexX = None
-                     field = [[0] * w for i in range(h)] # Создание поля шириной w и высотой h
-                     for j in range (h): 
-                            for i in range (w):
-                                   elementClassLine = elements[ind]["class"] #bs4.element.ResultSet содержит внутри элементы типа Tag у которого с помощью ["class"] можно получить строку CSS классов
-                                   ind += 1
-                                   #field[j][i] = self.cellPars(elementClassLine)
-                                   elementClassLine:list[str]
-                                   if elementClassLine[2] == "hd_closed" and len(elementClassLine) == 3 : # Если ячейка закрыта
-                                          field[j][i] = "-9"
-                                   elif elementClassLine[2] == "hd_closed" and elementClassLine[3] == "hd_flag": # Если ячейка закрыта, и на ней флаг
-                                          field[j][i] = "f"     #пока поставил '*' что бы не ломалась программа при победе
-                                   elif elementClassLine[2] == "hd_closed" and elementClassLine[3] == "start": #Если ячейка закрыта и на ней крестик, это для режима без угадывания
-                                          field[j][i] = "x"
-                                   elif elementClassLine[2] == "hd_opened" and elementClassLine[3] == "hd_type0": # Получение количества мин рядом с ячейкой
-                                          field[j][i] = "0"
-                                   elif elementClassLine[2] == "hd_opened" and elementClassLine[3] == "hd_type1": # Получение количества мин рядом с ячейкой
-                                          field[j][i] = "1"
-                                   elif elementClassLine[2] == "hd_opened" and elementClassLine[3] == "hd_type2": # Получение количества мин рядом с ячейкой
-                                          field[j][i] = "2"
-                                   elif elementClassLine[2] == "hd_opened" and elementClassLine[3] == "hd_type3": # Получение количества мин рядом с ячейкой
-                                          field[j][i] = "3"
-                                   elif elementClassLine[2] == "hd_opened" and elementClassLine[3] == "hd_type4": # Получение количества мин рядом с ячейкой
-                                          field[j][i] = "4"
-                                   elif elementClassLine[2] == "hd_opened" and elementClassLine[3] == "hd_type5": # Получение количества мин рядом с ячейкой
-                                          field[j][i] = "5"
-                                   elif elementClassLine[2] == "hd_opened" and elementClassLine[3] == "hd_type6": # Получение количества мин рядом с ячейкой
-                                          field[j][i] = "6"
-                                   elif elementClassLine[2] == "hd_opened" and elementClassLine[3] == "hd_type7": # Получение количества мин рядом с ячейкой
-                                          field[j][i] = "7"
-                                   elif elementClassLine[2] == "hd_opened" and elementClassLine[3] == "hd_type8": # Получение количества мин рядом с ячейкой
-                                          field[j][i] = "8"
+                            ind = 0                                                                         # индекс для перебора элементов в elements
+                            xMarkIndexY = None
+                            xMarkIndexX = None
+                            field = [[0] * w for i in range(h)] # Создание поля шириной w и высотой h
+                            for j in range (h): 
+                                   for i in range (w):
+                                          elementClassLine = elements[ind]["class"] #bs4.element.ResultSet содержит внутри элементы типа Tag у которого с помощью ["class"] можно получить строку CSS классов
+                                          ind += 1
+                                          #field[j][i] = self.cellPars(elementClassLine)
+                                          elementClassLine:list[str]
+                                          if elementClassLine[2] == "hd_closed" and len(elementClassLine) == 3 : # Если ячейка закрыта
+                                                 field[j][i] = "-9"
+                                          elif elementClassLine[2] == "hd_closed" and elementClassLine[3] == "hd_flag": # Если ячейка закрыта, и на ней флаг
+                                                 field[j][i] = "f"     #пока поставил '*' что бы не ломалась программа при победе
+                                          elif elementClassLine[2] == "hd_closed" and elementClassLine[3] == "start": #Если ячейка закрыта и на ней крестик, это для режима без угадывания
+                                                 field[j][i] = "x"
+                                          elif elementClassLine[2] == "hd_opened" and elementClassLine[3] == "hd_type0": 
+                                                 field[j][i] = "0"
+                                          elif elementClassLine[2] == "hd_opened" and elementClassLine[3] == "hd_type1": 
+                                                 field[j][i] = "1"
+                                          elif elementClassLine[2] == "hd_opened" and elementClassLine[3] == "hd_type2": 
+                                                 field[j][i] = "2"
+                                          elif elementClassLine[2] == "hd_opened" and elementClassLine[3] == "hd_type3": 
+                                                 field[j][i] = "3"
+                                          elif elementClassLine[2] == "hd_opened" and elementClassLine[3] == "hd_type4": 
+                                                 field[j][i] = "4"
+                                          elif elementClassLine[2] == "hd_opened" and elementClassLine[3] == "hd_type5": 
+                                                 field[j][i] = "5"
+                                          elif elementClassLine[2] == "hd_opened" and elementClassLine[3] == "hd_type6": 
+                                                 field[j][i] = "6"
+                                          elif elementClassLine[2] == "hd_opened" and elementClassLine[3] == "hd_type7": 
+                                                 field[j][i] = "7"
+                                          elif elementClassLine[2] == "hd_opened" and elementClassLine[3] == "hd_type8": 
+                                                 field[j][i] = "8"
 
-                                   if field[j][i] == "x":
-                                          xMarkIndexY = j
-                                          xMarkIndexX = i
-                     if xMarkIndexY != None and xMarkIndexY != None: 
-                            element = driver.find_element(By.XPATH, f"//*[@id=\"cell_{xMarkIndexX}_{xMarkIndexY}\"]")
-                            element.click()
+                                          if field[j][i] == "x":
+                                                 xMarkIndexY = j
+                                                 xMarkIndexX = i
+                            if xMarkIndexY != None and xMarkIndexY != None: 
+                                   element = driver.find_element(By.XPATH, f"//*[@id=\"cell_{xMarkIndexX}_{xMarkIndexY}\"]")
+                                   element.click()
+                            else:
+                                   sosedi(field,driver)
+                                   print("тут КОД ДАЛЬШЕ ПИШИ")
+                     
 
               except Exception as ex :
                      print(ex)

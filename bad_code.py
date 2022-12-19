@@ -20,10 +20,34 @@ options.add_experimental_option('excludeSwitches', ['enable-logging'])
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()),options=options)
 actionChains = ActionChains(driver)
 
-
-driver.get("https://minesweeper.online/ru/new-game/ng")
-#https://minesweeper.online/ru/start/1
-#https://minesweeper.online/ru/new-game/ng
+mode = int(input("0 - без угадывания; 1 - с угадыванием \n"))
+level = int(input("0 - лёгкий; 1 - средний; 2 - тяжёлый \n"))
+if mode == 0:
+    if level == 0:
+        driver.get("https://minesweeper.online/ru/new-game/ng")
+        i = 9 #строки
+        j = 9 #столбцы  
+    elif level == 1:
+        driver.get("https://minesweeper.online/ru/start/12")
+        i = 16 #строки
+        j = 16 #столбцы 
+    else:
+        driver.get("https://minesweeper.online/ru/start/13")
+        i = 16 #строки
+        j = 30 #столбцы 
+elif mode == 1:
+    if level == 0:
+        driver.get("https://minesweeper.online/ru/start/1")
+        i = 9 #строки
+        j = 9 #столбцы 
+    elif level == 1:
+        driver.get("https://minesweeper.online/ru/start/2")
+        i = 16 #строки
+        j = 16 #столбцы 
+    else:
+        driver.get("https://minesweeper.online/ru/start/3")
+        i = 16 #строки
+        j = 30 #столбцы 
 #top-area-face zoomable hd_top-area-face-unpressed
 #top-area-face zoomable hd_top-area-face-win
 #top-area-face zoomable hd_top-area-face-lose
@@ -31,429 +55,157 @@ driver.get("https://minesweeper.online/ru/new-game/ng")
 wincount = 0
 losecount =0
 isnt_finished = 0
-for lol in range(20):
-       i = 9 #строки
-       j = 9 #столбцы  
-       start_is_clicked = False   
-       mas = [0] * 9 
-       for i in range(9): 
-              mas[i] = [0] * 9 
-       driver.implicitly_wait(5)
-       time.sleep(2)
-       list_of_right_clicks = []
-       list_of_left_clicks = []
-       row = 0
-       column = 0
-       id = 1
-       for hz in range(0,2):
-              for row in range(0,9):
-                     if (start_is_clicked == True):
-                            start_is_clicked = False
-                            break
-                     print("новая строка")
-                     for column in range(0,9):
-                            str = (f'//*[@id="cell_{column}_{row}"]')
-                            cell = driver.find_element(By.XPATH, str)
-                            if hz == 1:
-                                   mas[row][column] = f'{id} {cell.get_attribute("class")}'
-                                   id += 1
-                            #mas[j][row] = cell.get_attribute
-                            #print(cell.get_attribute("class"))
-                            print(f'column = {column}, row = {row}')
-                            if (cell.get_attribute("class") == "cell size24 hd_closed start"):
-                                   mas[row][column] = {cell.get_attribute("class")}
-                                   cell.click()
-                                   if row != 8:
-                                          start_is_clicked = True
-                                          break
-       fake_mas = [0] * 9 
-       for i in range(9): 
-              fake_mas[i] = [0] * 9
+for lol in range(1):
+    start_is_clicked = False   
+    mas = [0] * i
+    for p in range(i): 
+            mas[p] = [0] * j
+    driver.implicitly_wait(5)
+    time.sleep(2)
+    list_of_right_clicks = []
+    list_of_left_clicks = []
+    row = 0
+    column = 0
+    id = 1
+    for hz in range(0,2):
+        for row in range(0,i):
+            if (start_is_clicked == True):
+                start_is_clicked = False
+                break
+            #print("новая строка")
+            for column in range(0,j):
+                str = (f'//*[@id="cell_{column}_{row}"]')
+                cell = driver.find_element(By.XPATH, str)
+                if hz == 1:
+                    mas[row][column] = f'{cell.get_attribute("class")}'
+                    id += 1
+                #mas[j][row] = cell.get_attribute
+                #print(cell.get_attribute("class"))
+                #print(f'column = {column}, row = {row}')
+                if (cell.get_attribute("class") == "cell size24 hd_closed start"):
+                    mas[row][column] = {cell.get_attribute("class")}
+                    cell.click()
+                    if row != (i-1):
+                        start_is_clicked = True
+                        break
+    fake_mas = [0] * i 
+    for l in range(i): 
+        fake_mas[l] = [0] * j
 
-       #print(len(mas[0][0]))
-       def update_fake_mas():
-              global id
-              for row in range(9):
-                     for column in range(9):
-                            if mas[row][column].find('cell size24 hd_closed') != -1:
-                                   fake_mas[row][column]= '-9'
-                            if mas[row][column].find('cell size24 hd_opened hd_type0') != -1:
-                                   fake_mas[row][column]= '0'
-                            if mas[row][column].find('cell size24 hd_opened hd_type1') != -1:
-                                   fake_mas[row][column]= '1'
-                            if mas[row][column].find('cell size24 hd_opened hd_type2') != -1:
-                                   fake_mas[row][column]= '2'
-                            if mas[row][column].find('cell size24 hd_opened hd_type3') != -1:
-                                   fake_mas[row][column]= '3'
-                            if mas[row][column].find('cell size24 hd_opened hd_type4') != -1:
-                                   fake_mas[row][column]= '4'
-                            if mas[row][column].find('cell size24 hd_opened hd_type5') != -1:
-                                   fake_mas[row][column]= '5'
-                            if mas[row][column].find('cell size24 hd_closed hd_flag') != -1:
-                                   fake_mas[row][column]= 'f'
-                            id += 1
-       update_fake_mas()
-       for row in fake_mas:
-              print(*row)
+    #print(len(mas[0][0]))
+    def update_fake_mas():
+        global id
+        for row in range(i):
+            for column in range(j):
+                if mas[row][column].find('cell size24 hd_closed') != -1:
+                    fake_mas[row][column]= '-9'
+                if mas[row][column].find('cell size24 hd_opened hd_type0') != -1:
+                    fake_mas[row][column]= '0'
+                if mas[row][column].find('cell size24 hd_opened hd_type1') != -1:
+                    fake_mas[row][column]= '1'
+                if mas[row][column].find('cell size24 hd_opened hd_type2') != -1:
+                    fake_mas[row][column]= '2'
+                if mas[row][column].find('cell size24 hd_opened hd_type3') != -1:
+                    fake_mas[row][column]= '3'
+                if mas[row][column].find('cell size24 hd_opened hd_type4') != -1:
+                    fake_mas[row][column]= '4'
+                if mas[row][column].find('cell size24 hd_opened hd_type5') != -1:
+                    fake_mas[row][column]= '5'
+                if mas[row][column].find('cell size24 hd_closed hd_flag') != -1:
+                    fake_mas[row][column]= 'f'
+                id += 1
+    update_fake_mas()
+    for row in fake_mas:
+        print(*row)
+    def clicks_on_cells(list_of_left_clicks):
+            for item in list_of_left_clicks:
+                    cell = driver.find_element(By.XPATH, item)
+                    if cell.get_attribute("class") != 'cell size24 hd_closed hd_flag':
+                        cell.click()
+    def set_flags(list_of_right_clicks):
+            for item in list_of_right_clicks:
+                    cell = driver.find_element(By.XPATH, item)
+                    if cell.get_attribute("class") != 'cell size24 hd_closed hd_flag':
+                        actionChains.context_click(cell).perform()
+    
+    def search_for_flags(fake_mas:list):
+        #yx = []
+        count_turns = 0
+        while(True):
+            list_of_right_clicks = []
+            list_of_left_clicks = []
+            count = 0
+            count_flags = 0
+            offsetList = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]]
+            xIndex,yIndex = 0,0
+            for row in fake_mas:
+                for column in row:
+                    for offset in offsetList:
+                        if yIndex + offset[0] >= 0 and xIndex + offset[1] >=0 and yIndex + offset[0] <= len(fake_mas) - 1 and xIndex + offset[1] <= len(row) - 1 : # первый and проверка на отрицательность смещённых индексов, что бы не получать значения с конца. Третий and для определения вышли мы за предел листа и если вышли то пропускаем такое смещение
+                            if fake_mas[yIndex + offset[0]][xIndex + offset[1]].find('-9') != -1 and column.find('-9') == -1 and column.find('f') == -1:
+                                count +=1
+                                coordinates_of_flags = (f'//*[@id="cell_{xIndex + offset[1]}_{yIndex + offset[0]}"]')
+                                print(f'жопа y{yIndex + offset[0]} x{xIndex + offset[1]}')
+                                print(coordinates_of_flags)
+                                print(column)
+                                list_of_right_clicks.append(coordinates_of_flags)
+                            if fake_mas[yIndex + offset[0]][xIndex + offset[1]].find('f') != -1 and column.find('-9') == -1 and column.find('f') == -1:
+                                count_flags +=1
+                                coordinates_of_click = (f'//*[@id="cell_{xIndex + offset[1]}_{yIndex + offset[0]}"]')
+                                print(f'жопа y{yIndex + offset[0]} x{xIndex + offset[1]}')
+                                print(coordinates_of_click)
+                                print(column)
+                                list_of_left_clicks.append(coordinates_of_click)
+                                #yx.append([yIndex + offset[0],xIndex + offset[1]])
 
-       count = 0
-       def search_for_flags():
-              for row in range(9):
-                     for column in range(9):
-                            
-                                   # Если угловые клетки с 1 и вокруг одна -1
-                            if (fake_mas[row][column].find('-9') == -1 and fake_mas[row][column].find('f') == -1 and row == 0 and column == 0):
-                                   if fake_mas[row][column+1].find('-9') != -1:
-                                          count +=1
-                                   for y in range(2):
-                                          if fake_mas[row+1][column+y].find('-9') != -1:
-                                                 count +=1
+                    if column.find('f') == -1 and count <= int(column):
+                        print("вокруг клетки меньши либо равно закрытых клеток \nрайт клики")
+                        print(list_of_right_clicks)
+                        set_flags(list_of_right_clicks)
+                        count_turns += 1
+                        #for para in yx:
+                            #fake_mas[para[0]][para[1]] = "f"
+                    if column.find('f') == -1 and count_flags == int(column):
+                        print("количество флагов вокруг клетки равно клетке \nлефт клики")
+                        print(list_of_left_clicks)
+                        clicks_on_cells(list_of_left_clicks)
+                        count_turns += 1
+                    list_of_left_clicks = []
+                    list_of_right_clicks = []
+                    count_flags = 0
+                    count = 0
+                    xIndex += 1                     #rowIndex - счётчик символа в строке
+                xIndex = 0                            #Обнуляем счётчик что бы не словить out of range
+                yIndex += 1                         #columnindex - счётчик строки
+        
+            if count_turns == 0:
+                for row in fake_mas:
+                    for column in row:
+                        for offset in offsetList:
+                            if yIndex + offset[0] >= 0 and xIndex + offset[1] >=0 and yIndex + offset[0] <= len(fake_mas) - 1 and xIndex + offset[1] <= len(row) - 1 : # первый and проверка на отрицательность смещённых индексов, что бы не получать значения с конца. Третий and для определения вышли мы за предел листа и если вышли то пропускаем такое смещение
+                                if fake_mas[yIndex + offset[0]][xIndex + offset[1]].find('-9') != -1 and column.find('-9') == -1 and column.find('f') == -1 and column.find('1') != -1:
+                                    coordinate_of_click = (f'//*[@id="cell_{xIndex + offset[1]}_{yIndex + offset[0]}"]')
+                                    driver.find_element(By.XPATH, coordinate_of_click)      
+            count_turns = 0  
+                      #container.append([cell, xIndex, yIndex, field[yIndex + offset[0]][xIndex + offset[1]], xIndex + offset[1], yIndex + offset[0]]) # Состав одного элемента listOfneighborCells: [Ячейка, Координата X, Координата Y, Содержимое соседней ячейки, Координата Х соседа, Координата У соседа]
+#Состав одного элта listOfneighborCells: [Ячейка, Координата X, Координата Y, Содержимое соседней ячейки, Координата Х соседа, Координата У соседа]
+                    
+    search_for_flags(fake_mas)
 
-                            elif (fake_mas[row][column].find('-9') == -1 and fake_mas[row][column].find('f') == -1 and row == 0 and column == 8):
-                                   if fake_mas[row][column-1].find('-9') != -1:
-                                          count +=1
-                                   for y in range(-1,1):
-                                          if fake_mas[row+1][column+y].find('-9') != -1:
-                                                 count +=1
-
-                            elif (fake_mas[row][column].find('-9') == -1 and fake_mas[row][column].find('f') == -1 and row == 8 and column == 0):
-                                   if fake_mas[row][column+1].find('-9') != -1:
-                                          count +=1
-                                   for y in range(2):
-                                          if fake_mas[row-1][column+y].find('-9') != -1:
-                                                 count +=1
-
-                            elif (fake_mas[row][column].find('-9') == -1 and fake_mas[row][column].find('f') == -1 and row == 8 and column == 8):
-                                   if fake_mas[row][column-1].find('-9') != -1:
-                                          count +=1
-                                   for y in range(-1,1):
-                                          if fake_mas[row-1][column+y].find('-9') != -1:
-                                                 count +=1
-                            # Если клетка в первом ряду И не угловая И 1 И вокруг одна -1
-                            elif (fake_mas[row][column].find('-9') == -1 and fake_mas[row][column].find('f') == -1 and row == 0 and column !=0 and column != 8):
-                                   if fake_mas[row][column - 1].find('-9') !=-1:
-                                          count +=1
-                                   if fake_mas[row][column + 1].find('-9') !=-1:
-                                          count +=1
-                                   for y in range(-1,2):
-                                          if fake_mas[row+1][column + y].find('-9') !=-1:
-                                                 count +=1
-                            # Если клетка в последнем ряду И не угловая И 1 И вокруг одна -1
-                            elif (fake_mas[row][column].find('-9') == -1 and fake_mas[row][column].find('f') == -1 and row == 8 and column !=0 and column != 8):
-                                   if fake_mas[row][column - 1].find('-9') !=-1:
-                                          count +=1
-                                   if fake_mas[row][column + 1].find('-9') !=-1:
-                                          count +=1
-                                   for y in range(-1,2):
-                                          if fake_mas[row-1][column + y].find('-9') !=-1:
-                                                 count +=1
-                            # Если клетка в первом столбце И не угловая И 1 И вокруг одна -1
-                            elif (fake_mas[row][column].find('-9') == -1 and fake_mas[row][column].find('f') == -1 and row != 0 and row != 8 and column == 0):
-                                   if fake_mas[row - 1][column].find('-9') !=-1:
-                                          count +=1
-                                   if fake_mas[row + 1][column].find('-9') !=-1:
-                                          count +=1
-                                   for y in range(-1,2):
-                                          if fake_mas[row+y][column + 1].find('-9') !=-1:
-                                                 count +=1
-                            # Если клетка в последнем столбце И не угловая И 1 И вокруг одна -1
-                            elif (fake_mas[row][column].find('-9') == -1 and fake_mas[row][column].find('f') == -1 and row != 0 and row != 8 and column == 8):
-                                   if fake_mas[row - 1][column].find('-9') !=-1:
-                                          count +=1
-                                   if fake_mas[row + 1][column].find('-9') !=-1:
-                                          count +=1
-                                   for y in range(-1,2):
-                                          if fake_mas[row+y][column - 1].find('-9') !=-1:
-                                                 count +=1
-                            elif(fake_mas[row][column].find('-9') == -1 and fake_mas[row][column].find('f') == -1 and row != 0 and  column != 0 and row != 8 and  column != 8):
-                                   for x in range(-1,2):
-                                          for y in range(-1,2):
-                                                 if fake_mas[row + x][column+y].find('-9') !=-1:
-                                                        count +=1
-              #=======================================================================================================================
-              #============================================================================================================================
-                                   # Если угловые клетки с 1 и вокруг одна -1
-                            if (fake_mas[row][column].find('-9') == -1 and fake_mas[row][column].find('f') == -1 and row == 0 and column == 0):
-                                   if fake_mas[row][column+1].find('-9') != -1 and count == 1:
-                                          if count ==1: list_of_right_clicks.append((f'//*[@id="cell_{column+1}_{row}"]'))
-                                   if fake_mas[row+1][column].find('-9') != -1 and count == 1:
-                                          if count ==1: list_of_right_clicks.append((f'//*[@id="cell_{column}_{row+1}"]'))
-                                   if fake_mas[row+1][column+1].find('-9') != -1 and count == 1:
-                                          if count ==1: list_of_right_clicks.append((f'//*[@id="cell_{column+1}_{row+1}"]'))
-
-                            if (fake_mas[row][column].find('-9') == -1 and fake_mas[row][column].find('f') == -1 and row == 0 and column == 8):
-                                   if fake_mas[row][column-1].find('-9') != -1 and count == 1:
-                                          if count ==1: list_of_right_clicks.append((f'//*[@id="cell_{column-1}_{row}"]'))
-                                   if fake_mas[row+1][column].find('-9') != -1 and count == 1:
-                                          if count ==1: list_of_right_clicks.append((f'//*[@id="cell_{column}_{row+1}"]'))
-                                   if fake_mas[row+1][column-1].find('-9') != -1 and count == 1:
-                                          if count ==1: list_of_right_clicks.append((f'//*[@id="cell_{column-1}_{row+1}"]'))
-
-                            if (fake_mas[row][column].find('-9') == -1 and fake_mas[row][column].find('f') == -1 and row == 8 and column == 0):
-                                   if fake_mas[row][column+1].find('-9') != -1 and count == 1:
-                                          if count ==1: list_of_right_clicks.append((f'//*[@id="cell_{column+1}_{row}"]'))
-                                   if fake_mas[row-1][column].find('-9') != -1 and count == 1:
-                                          if count ==1: list_of_right_clicks.append((f'//*[@id="cell_{column}_{row-1}"]'))
-                                   if fake_mas[row-1][column+1].find('-9') != -1 and count == 1:
-                                          if count ==1: list_of_right_clicks.append((f'//*[@id="cell_{column+1}_{row-1}"]'))
-
-                            if (fake_mas[row][column].find('-9') == -1 and fake_mas[row][column].find('f') == -1 and row == 8 and column == 8):
-                                   if fake_mas[row][column-1].find('-9') != -1 and count == 1:
-                                          if count ==1: list_of_right_clicks.append((f'//*[@id="cell_{column-1}_{row}"]'))
-                                   if fake_mas[row-1][column].find('-9') != -1 and count == 1:
-                                          if count ==1: list_of_right_clicks.append((f'//*[@id="cell_{column}_{row-1}"]'))
-                                   if fake_mas[row-1][column-1].find('-9') != -1 and count == 1:
-                                          if count ==1: list_of_right_clicks.append((f'//*[@id="cell_{column-1}_{row-1}"]'))
-                            # Если клетка в первом ряду И не угловая И 1 И вокруг одна -1
-                            if (fake_mas[row][column].find('-9') == -1 and fake_mas[row][column].find('f') == -1 and row == 0 and column !=0 and column != 8):
-                                   if fake_mas[row][column - 1].find('-9') !=-1 and count == 1:
-                                          if count ==1: list_of_right_clicks.append((f'//*[@id="cell_{column-1}_{row}"]'))
-                                   if fake_mas[row][column + 1].find('-9') !=-1 and count == 1:
-                                          if count ==1: list_of_right_clicks.append((f'//*[@id="cell_{column+1}_{row}"]'))
-                                   for y in range(-1,1):
-                                          if fake_mas[row+1][column + y].find('-9') !=-1 and count == 1:
-                                                 if count ==1: list_of_right_clicks.append((f'//*[@id="cell_{column+y}_{row+1}"]'))
-                            # Если клетка в последнем ряду И не угловая И 1 И вокруг одна -1
-                            if (fake_mas[row][column].find('-9') == -1 and fake_mas[row][column].find('f') == -1 and row == 8 and column !=0 and column != 8):
-                                   if fake_mas[row][column - 1].find('-9') !=-1 and count == 1:
-                                          if count ==1: list_of_right_clicks.append((f'//*[@id="cell_{column-1}_{row}"]'))
-                                   if fake_mas[row][column + 1].find('-9') !=-1 and count == 1:
-                                          if count ==1: list_of_right_clicks.append((f'//*[@id="cell_{column+1}_{row}"]'))
-                                   for y in range(-1,1):
-                                          if fake_mas[row-1][column + y].find('-9') !=-1 and count == 1:
-                                                 if count ==1: list_of_right_clicks.append((f'//*[@id="cell_{column+y}_{row-1}"]'))
-                            # Если клетка в первом столбце И не угловая И 1 И вокруг одна -1
-                            if (fake_mas[row][column].find('-9') == -1 and fake_mas[row][column].find('f') == -1 and row != 0 and row != 8 and column == 0):
-                                   if fake_mas[row - 1][column].find('-9') !=-1 and count == 1:
-                                          if count ==1: list_of_right_clicks.append((f'//*[@id="cell_{column}_{row-1}"]'))
-                                   if fake_mas[row + 1][column].find('-9') !=-1 and count == 1:
-                                          if count ==1: list_of_right_clicks.append((f'//*[@id="cell_{column}_{row+1}"]'))
-                                   for y in range(-1,1):
-                                          if fake_mas[row+y][column + 1].find('-9') !=-1 and count == 1:
-                                                 if count ==1: list_of_right_clicks.append((f'//*[@id="cell_{column+1}_{row+y}"]'))
-                            # Если клетка в последнем столбце И не угловая И 1 И вокруг одна -1
-                            if (fake_mas[row][column].find('-9') == -1 and fake_mas[row][column].find('f') == -1 and row != 0 and row != 8 and column == 8):
-                                   if fake_mas[row - 1][column].find('-9') !=-1 and count == 1:
-                                          if count ==1: list_of_right_clicks.append((f'//*[@id="cell_{column}_{row-1}"]'))
-                                   if fake_mas[row + 1][column].find('-9') !=-1 and count == 1:
-                                          if count ==1: list_of_right_clicks.append((f'//*[@id="cell_{column}_{row+1}"]'))
-                                   for y in range(-1,1):
-                                          if fake_mas[row+y][column - 1].find('-9') !=-1 and count == 1:
-                                                 if count ==1: list_of_right_clicks.append((f'//*[@id="cell_{column-1}_{row+y}"]'))
-                            elif(fake_mas[row][column].find('-9') == -1 and fake_mas[row][column].find('f') == -1 and row != 0 and  column != 0 and row != 8 and  column != 8):
-                                   for x in range(-1,2):
-                                          for y in range(-1,2):
-                                                 if fake_mas[row + x][column+y].find('-9') !=-1:
-                                                        if count ==1: list_of_right_clicks.append((f'//*[@id="cell_{column+y}_{row+x}"]'))
-                            count = 0
-       search_for_flags()
-       # print(list_of_right_clicks)
-       #Функия расстановки флагов
-       def set_flags():
-              for item in list_of_right_clicks:
-                     cell = driver.find_element(By.XPATH, item)
-                     if cell.get_attribute("class") != 'cell size24 hd_closed hd_flag':
-                            actionChains.context_click(cell).perform()
-       set_flags()
-       #Функция собиранния данных об ячейках
-       def look_in_field():
-              global id
-              for row in range(0,9):
-                            print("новая строка")
-                            for column in range(0,9):
-                                   str = (f'//*[@id="cell_{column}_{row}"]')
-                                   cell = driver.find_element(By.XPATH, str)
-                                   if hz == 1:
-                                          mas[row][column] = f'{id} {cell.get_attribute("class")}'
-                                          id += 1
-                                   #mas[j][row] = cell.get_attribute
-                                   #print(cell.get_attribute("class"))
-                                   print(f'column = {column}, row = {row}')
-
-       look_in_field()
-       update_fake_mas()
-       def search_for_cells():
-              count =0
-              for row in range(9):
-                     for column in range(9):
-                            current_cell = fake_mas[row][column]
-                                   # Если угловые клетки с 1 и вокруг одна -1
-                            if (fake_mas[row][column].find('-9') == -1 and fake_mas[row][column].find('f') == -1 and row == 0 and column == 0):
-                                   if fake_mas[row][column+1].find('f') != -1:
-                                          count +=1
-                                   for y in range(2):
-                                          if fake_mas[row+1][column+y].find('f') != -1:
-                                                 count +=1
-
-                            elif (fake_mas[row][column].find('-9') == -1 and fake_mas[row][column].find('f') == -1 and row == 0 and column == 8):
-                                   if fake_mas[row][column-1].find('f') != -1:
-                                          count +=1
-                                   for y in range(-1,1):
-                                          if fake_mas[row+1][column+y].find('f') != -1:
-                                                 count +=1
-
-                            elif (fake_mas[row][column].find('-9') == -1 and fake_mas[row][column].find('f') == -1 and row == 8 and column == 0):
-                                   if fake_mas[row][column+1].find('f') != -1:
-                                          count +=1
-                                   for y in range(2):
-                                          if fake_mas[row-1][column+y].find('f') != -1:
-                                                 count +=1
-
-                            elif (fake_mas[row][column].find('-9') == -1 and fake_mas[row][column].find('f') == -1 and row == 8 and column == 8):
-                                   if fake_mas[row][column-1].find('f') != -1:
-                                          count +=1
-                                   for y in range(-1,1):
-                                          if fake_mas[row-1][column+y].find('f') != -1:
-                                                 count +=1
-                            # Если клетка в первом ряду И не угловая И 1 И вокруг одна -1
-                            elif (fake_mas[row][column].find('-9') == -1 and fake_mas[row][column].find('f') == -1 and row == 0 and column !=0 and column != 8):
-                                   if fake_mas[row][column - 1].find('f') !=-1:
-                                          count +=1
-                                   if fake_mas[row][column + 1].find('f') !=-1:
-                                          count +=1
-                                   for y in range(-1,2):
-                                          if fake_mas[row+1][column + y].find('f') !=-1:
-                                                 count +=1
-                            # Если клетка в последнем ряду И не угловая И 1 И вокруг одна -1
-                            elif (fake_mas[row][column].find('-9') == -1 and fake_mas[row][column].find('f') == -1 and row == 8 and column !=0 and column != 8):
-                                   if fake_mas[row][column - 1].find('f') !=-1:
-                                          count +=1
-                                   if fake_mas[row][column + 1].find('f') !=-1:
-                                          count +=1
-                                   for y in range(-1,2):
-                                          if fake_mas[row-1][column + y].find('f') !=-1:
-                                                 count +=1
-                            # Если клетка в первом столбце И не угловая И 1 И вокруг одна -1
-                            elif (fake_mas[row][column].find('-9') == -1 and fake_mas[row][column].find('f') == -1 and row != 0 and row != 8 and column == 0):
-                                   if fake_mas[row - 1][column].find('f') !=-1:
-                                          count +=1
-                                   if fake_mas[row + 1][column].find('f') !=-1:
-                                          count +=1
-                                   for y in range(-1,2):
-                                          if fake_mas[row+y][column + 1].find('f') !=-1:
-                                                 count +=1
-                            # Если клетка в последнем столбце И не угловая И 1 И вокруг одна -1
-                            elif (fake_mas[row][column].find('-9') == -1 and fake_mas[row][column].find('f') == -1 and row != 0 and row != 8 and column == 8):
-                                   if fake_mas[row - 1][column].find('f') !=-1:
-                                          count +=1
-                                   if fake_mas[row + 1][column].find('f') !=-1:
-                                          count +=1
-                                   for y in range(-1,2):
-                                          if fake_mas[row+y][column - 1].find('f') !=-1:
-                                                 count +=1
-                            elif(fake_mas[row][column].find('-9') == -1 and fake_mas[row][column].find('f') == -1 and row != 0 and  column != 0 and row != 8 and  column != 8):
-                                   for x in range(-1,2):
-                                          for y in range(-1,2):
-                                                 if fake_mas[row + x][column+y].find('f') !=-1:
-                                                        count +=1
-              #=======================================================================================================================
-              #============================================================================================================================
-                                   # Если угловые клетки с 1 и вокруг одна -1
-                            if current_cell != 'f':
-                                   if count == int(current_cell):
-                                          if (fake_mas[row][column].find('-9') == -1 and fake_mas[row][column].find('f') == -1 and row == 0 and column == 0):
-                                                 if fake_mas[row][column+1].find('-9') != -1 and count == 1:
-                                                        list_of_left_clicks.append((f'//*[@id="cell_{column+1}_{row}"]'))
-                                                 if fake_mas[row+1][column].find('-9') != -1 and count == 1:
-                                                        list_of_left_clicks.append((f'//*[@id="cell_{column}_{row+1}"]'))
-                                                 if fake_mas[row+1][column+1].find('-9') != -1 and count == 1:
-                                                        list_of_left_clicks.append((f'//*[@id="cell_{column+1}_{row+1}"]'))
-
-                                          if (fake_mas[row][column].find('-9') == -1 and fake_mas[row][column].find('f') == -1 and row == 0 and column == 8):
-                                                 if fake_mas[row][column-1].find('-9') != -1 and count == 1:
-                                                        list_of_left_clicks.append((f'//*[@id="cell_{column-1}_{row}"]'))
-                                                 if fake_mas[row+1][column].find('-9') != -1 and count == 1:
-                                                        list_of_left_clicks.append((f'//*[@id="cell_{column}_{row+1}"]'))
-                                                 if fake_mas[row+1][column-1].find('-9') != -1 and count == 1:
-                                                        list_of_left_clicks.append((f'//*[@id="cell_{column-1}_{row+1}"]'))
-
-                                          if (fake_mas[row][column].find('-9') == -1 and fake_mas[row][column].find('f') == -1 and row == 8 and column == 0):
-                                                 if fake_mas[row][column+1].find('-9') != -1 and count == 1:
-                                                        list_of_left_clicks.append((f'//*[@id="cell_{column+1}_{row}"]'))
-                                                 if fake_mas[row-1][column].find('-9') != -1 and count == 1:
-                                                        list_of_left_clicks.append((f'//*[@id="cell_{column}_{row-1}"]'))
-                                                 if fake_mas[row-1][column+1].find('-9') != -1 and count == 1:
-                                                        list_of_left_clicks.append((f'//*[@id="cell_{column+1}_{row-1}"]'))
-
-                                          if (fake_mas[row][column].find('-9') == -1 and fake_mas[row][column].find('f') == -1 and row == 8 and column == 8):
-                                                 if fake_mas[row][column-1].find('-9') != -1 and count == 1:
-                                                        list_of_left_clicks.append((f'//*[@id="cell_{column-1}_{row}"]'))
-                                                 if fake_mas[row-1][column].find('-9') != -1 and count == 1:
-                                                        list_of_left_clicks.append((f'//*[@id="cell_{column}_{row-1}"]'))
-                                                 if fake_mas[row-1][column-1].find('-9') != -1 and count == 1:
-                                                        list_of_left_clicks.append((f'//*[@id="cell_{column-1}_{row-1}"]'))
-                                          # Если клетка в первом ряду И не угловая И 1 И вокруг одна -1
-                                          if (fake_mas[row][column].find('-9') == -1 and fake_mas[row][column].find('f') == -1 and row == 0 and column !=0 and column != 8):
-                                                 if fake_mas[row][column - 1].find('-9') !=-1 and count == 1:
-                                                        list_of_left_clicks.append((f'//*[@id="cell_{column-1}_{row}"]'))
-                                                 if fake_mas[row][column + 1].find('-9') !=-1 and count == 1:
-                                                        list_of_left_clicks.append((f'//*[@id="cell_{column+1}_{row}"]'))
-                                                 for y in range(-1,1):
-                                                        if fake_mas[row+1][column + y].find('-9') !=-1 and count == 1:
-                                                               list_of_left_clicks.append((f'//*[@id="cell_{column+y}_{row+1}"]'))
-                                          # Если клетка в последнем ряду И не угловая И 1 И вокруг одна -1
-                                          if (fake_mas[row][column].find('-9') == -1 and fake_mas[row][column].find('f') == -1 and row == 8 and column !=0 and column != 8):
-                                                 if fake_mas[row][column - 1].find('-9') !=-1 and count == 1:
-                                                        list_of_left_clicks.append((f'//*[@id="cell_{column-1}_{row}"]'))
-                                                 if fake_mas[row][column + 1].find('-9') !=-1 and count == 1:
-                                                        list_of_left_clicks.append((f'//*[@id="cell_{column+1}_{row}"]'))
-                                                 for y in range(-1,1):
-                                                        if fake_mas[row-1][column + y].find('-9') !=-1 and count == 1:
-                                                               list_of_left_clicks.append((f'//*[@id="cell_{column+y}_{row-1}"]'))
-                                          # Если клетка в первом столбце И не угловая И 1 И вокруг одна -1
-                                          if (fake_mas[row][column].find('-9') == -1 and fake_mas[row][column].find('f') == -1 and row != 0 and row != 8 and column == 0):
-                                                 if fake_mas[row - 1][column].find('-9') !=-1 and count == 1:
-                                                        list_of_left_clicks.append((f'//*[@id="cell_{column}_{row-1}"]'))
-                                                 if fake_mas[row + 1][column].find('-9') !=-1 and count == 1:
-                                                        list_of_left_clicks.append((f'//*[@id="cell_{column}_{row+1}"]'))
-                                                 for y in range(-1,1):
-                                                        if fake_mas[row+y][column + 1].find('-9') !=-1 and count == 1:
-                                                               list_of_left_clicks.append((f'//*[@id="cell_{column+1}_{row+y}"]'))
-                                          # Если клетка в последнем столбце И не угловая И 1 И вокруг одна -1
-                                          if (fake_mas[row][column].find('-9') == -1 and fake_mas[row][column].find('f') == -1 and row != 0 and row != 8 and column == 8):
-                                                 if fake_mas[row - 1][column].find('-9') !=-1 and count == 1:
-                                                        list_of_left_clicks.append((f'//*[@id="cell_{column}_{row-1}"]'))
-                                                 if fake_mas[row + 1][column].find('-9') !=-1 and count == 1:
-                                                        list_of_left_clicks.append((f'//*[@id="cell_{column}_{row+1}"]'))
-                                                 for y in range(-1,1):
-                                                        if fake_mas[row+y][column - 1].find('-9') !=-1 and count == 1:
-                                                               list_of_left_clicks.append((f'//*[@id="cell_{column-1}_{row+y}"]'))
-                                          elif(fake_mas[row][column].find('-9') == -1 and fake_mas[row][column].find('f') == -1 and row != 0 and  column != 0 and row != 8 and  column != 8):
-                                                 for x in range(-1,2):
-                                                        for y in range(-1,2):
-                                                               if fake_mas[row + x][column+y].find('-9') !=-1:
-                                                                      list_of_left_clicks.append((f'//*[@id="cell_{column+y}_{row+x}"]'))
-                                   count = 0
-       search_for_cells()
-       def clicks_on_cells():
-              for item in list_of_left_clicks:
-                     cell = driver.find_element(By.XPATH, item)
-                     if cell.get_attribute("class") != 'cell size24 hd_closed hd_flag':
-                            cell.click()
-       clicks_on_cells()
-       for i in range(15):
-              if driver.find_element(By.XPATH, '//*[@id="top_area_face"]').get_attribute('class')=='top-area-face zoomable hd_top-area-face-unpressed':
-                     look_in_field()
-                     update_fake_mas()
-                     search_for_flags()
-                     set_flags()
-
-                     look_in_field()
-                     update_fake_mas()
-                     search_for_cells()
-                     clicks_on_cells()
-              elif driver.find_element(By.XPATH, '//*[@id="top_area_face"]').get_attribute('class')=='top-area-face zoomable hd_top-area-face-lose':
-                     time.sleep(2)
-                     driver.find_element(By.XPATH, '//*[@id="top_area_face"]').click()
-                     losecount +=1
-                     break
-              elif driver.find_element(By.XPATH, '//*[@id="top_area_face"]').get_attribute('class')=='top-area-face zoomable hd_top-area-face-win':
-                     time.sleep(2)
-                     driver.find_element(By.XPATH, '//*[@id="top_area_face"]').click()
-                     wincount +=1
-                     break
-       driver.find_element(By.XPATH, '//*[@id="top_area_face"]').click()
-       isnt_finished += 1
+    if driver.find_element(By.XPATH, '//*[@id="top_area_face"]').get_attribute('class')=='top-area-face zoomable hd_top-area-face-unpressed':
+        s
+    elif driver.find_element(By.XPATH, '//*[@id="top_area_face"]').get_attribute('class')=='top-area-face zoomable hd_top-area-face-lose':
+            time.sleep(2)
+            driver.find_element(By.XPATH, '//*[@id="top_area_face"]').click()
+            losecount +=1
+            break
+    elif driver.find_element(By.XPATH, '//*[@id="top_area_face"]').get_attribute('class')=='top-area-face zoomable hd_top-area-face-win':
+            time.sleep(2)
+            driver.find_element(By.XPATH, '//*[@id="top_area_face"]').click()
+            wincount +=1
+            break
+    driver.find_element(By.XPATH, '//*[@id="top_area_face"]').click()
+    isnt_finished += 1
 print(f'Количество побед: {wincount}')
 print(f'Количество поражений: {losecount}')
 print(f'Всего сыграно: {isnt_finished}')
