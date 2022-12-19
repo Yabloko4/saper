@@ -185,6 +185,7 @@ for lol in range(1):
         count_turns = 0
         list_of_right_clicks = []
         list_of_left_clicks = []
+        count_loh = 0
         count_offset = 0
         count_opened_sosed = 0
         count = 0
@@ -226,24 +227,31 @@ for lol in range(1):
             xIndex = 0                            #Обнуляем счётчик что бы не словить out of range
             yIndex += 1                         #columnindex - счётчик строки
     
-        if len(fake_mas) ==0:
+        if count_turns == 0:
+            count_loh += 1
+            xIndex,yIndex = 0,0
             for row in fake_mas:
                 for column in row:
                     for offset in offsetList:
                         if yIndex + offset[0] >= 0 and xIndex + offset[1] >=0 and yIndex + offset[0] <= len(fake_mas) - 1 and xIndex + offset[1] <= len(row) - 1 : # первый and проверка на отрицательность смещённых индексов, что бы не получать значения с конца. Третий and для определения вышли мы за предел листа и если вышли то пропускаем такое смещение
                             if fake_mas[yIndex + offset[0]][xIndex + offset[1]].find('-9') != -1 and column.find('-9') == -1 and column.find('f') == -1 and column.find('1') != -1:
-                                coordinate_of_click = (f'//*[@id="cell_{xIndex + offset[1]}_{yIndex + offset[0]}"]')
-                                pure = driver.find_element(By.XPATH, coordinate_of_click)    
-                                pure.click() 
-                                check_game() 
-        
+                                if count_loh == 1:
+                                    coordinate_of_click = (f'//*[@id="cell_{xIndex + offset[1]}_{yIndex + offset[0]}"]')
+                                    pure = driver.find_element(By.XPATH, coordinate_of_click)    
+                                    pure.click()
+                                    count_loh = 0
+                                    check_game() 
+                    xIndex += 1
+                xIndex = 0
+                yIndex += 1
+        count_loh = 0
         count_turns = 0
         check_game() 
                    
     update_fake_mas()
     for row in fake_mas:
         print(*row)        
-    for lal in range(30):
+    for lal in range(100):
         look_in_field()
         update_fake_mas()
         search_for_turns(fake_mas)
